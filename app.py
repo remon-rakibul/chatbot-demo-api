@@ -52,6 +52,8 @@ in terms of length, ton of voice, logical arguments and other details
 
 3/ Avoid any html tags in your response. Response should only be in text
 
+4/ Don't make up information. If you don't know something, admit you don't know
+
 Below is a message I received from the user:
 {message}
 

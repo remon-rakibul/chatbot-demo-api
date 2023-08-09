@@ -1,42 +1,7 @@
-# import streamlit as st
-from langchain.document_loaders import UnstructuredURLLoader
-from langchain.vectorstores import FAISS
-from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# 1. Vectorize the data
-
-urls = [
-    "https://arisaftech.com/",
-    "https://arisaftech.com/services/",
-    "https://arisaftech.com/about/",
-    "https://arisaftech.com/career/",
-]
-
-loader = UnstructuredURLLoader(urls=urls)
-data = loader.load()
-
-embeddings = OpenAIEmbeddings()
-db = FAISS.from_documents(data, embeddings)
-
-
-
-
-# 2. Function for similarity search
-
-def retrieve_info(query):
-    similar_response = db.similarity_search(query, k=3)
-
-    page_contents_array = [doc.page_content for doc in similar_response]
-
-    # print(page_contents_array)
-
-    return page_contents_array
+import embedding
 
 # 3. Setup LLMChain and prompts
 
@@ -75,35 +40,16 @@ chain = LLMChain(llm=llm, prompt=prompt)
 # 4. Retrieval augmented generation
 
 def generate_response(message):
-    best_practice = retrieve_info(message)
+    best_practice = embedding.retrieve_info(message)
     response = chain.run(message=message, best_practice=best_practice)
     return response
 
 
-query = input("enter your message: ")
-
-print(f'Response: {generate_response(query)}')
-
-
-
+def generate_response_from_pdf_file(text, message):
+    best_practice = embedding.retrieve_info_from_pdf_file(text, message)
+    response = chain.run(message=message, best_practice=best_practice)
+    return response
 
 
-# 5. Build an app with streamlit
-
-# def main():
-#     st.set_page_config(
-#         page_title="AriSaf chatbot", page_icon=":bird:")
-
-#     st.header("AriSaf chatbot :bird:")
-#     message = st.text_area("write your message")
-
-#     if message:
-#         st.write("Generating answer...")
-
-#         result = generate_response(message)
-
-#         st.info(result)
-
-
-# if __name__ == '__main__':
-#     main()
+# query = input("enter your message: ")
+# print(f'Response: {generate_response(query)}')

@@ -31,7 +31,6 @@ Please write the best response that will impress the user to work with the compa
 """
 
 template_for_file = """
-// Write your prompt engineered template here
 You are a world class representative chatbot 
 you will share a user's message with you and you will give me the best answer based on past best practies, 
 and you will follow ALL of the rules below:
@@ -57,7 +56,6 @@ Here is a list of best practies of how we normally respond to user in similar sc
 {best_practice}
 
 Please write the best response that will impress the user:
-
 """
 
 prompt = PromptTemplate(

@@ -1,14 +1,14 @@
-import os
+from langchain.document_loaders import Docx2txtLoader
 from fastapi import FastAPI, File, UploadFile, Form 
-from typing import Annotated
+from langchain.document_loaders import PyPDFLoader
 from pydantic import BaseModel
-import PyPDF2
-from docx import Document
 from pptx import Presentation
+from typing import Annotated
+from docx import Document
 import tempfile
 import prompt
-import embedding
-from langchain.document_loaders import PyPDFLoader
+import os
+import uvicorn
 
 
 class Prompt(BaseModel):
@@ -38,25 +38,17 @@ async def upload(query: Annotated[str, Form()], file: Annotated[UploadFile | Non
             f.write(file.file.read())
 
         if (file.filename.endswith(".pdf")):
-            print("It's a pdf file")
-            # reader = PyPDF2.PdfReader(file.file)
-            # content = ''
-            # for page in reader.pages:
-            #     content += page.extract_text()
-            #     # print(content)
-            # print(file.file)
             loader = PyPDFLoader(file_path)
             pages = loader.load_and_split()
             response = prompt.generate_response_from_pdf_file(pages, query)
 
 
         elif (file.filename.endswith(".docx") or file.filename.endswith(".doc")):
-            print("It's doc file")
-            doc = Document(file_path)
-            content = ""
-            for para in doc.paragraphs:
-                content += para.text
-            print(content)
+            loader = Docx2txtLoader(file_path)
+            data = loader.load()
+            response = prompt.generate_response_from_file(data, query)
+
+
                 
         elif (file.filename.endswith(".ppt") or file.filename.endswith(".pptx")):
             print("It's a ppt file")
@@ -76,3 +68,7 @@ async def upload(query: Annotated[str, Form()], file: Annotated[UploadFile | Non
                 print(content)
 
         return {"response": response}
+    
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

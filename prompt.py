@@ -51,5 +51,11 @@ def generate_response_from_pdf_file(text, message):
     return response
 
 
+def generate_response_from_file(text, message):
+    best_practice = embedding.retrieve_info_from_file(text, message)
+    response = chain.run(message=message, best_practice=best_practice)
+    return response
+
+
 # query = input("enter your message: ")
 # print(f'Response: {generate_response(query)}')

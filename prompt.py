@@ -65,12 +65,12 @@ prompt = PromptTemplate(
 
 chain = LLMChain(llm=llm, prompt=prompt)
 
-# prompt_for_file = PromptTemplate(
-#     input_variables=["message", "best_practice"],
-#     template=template_for_file
-# )
+prompt_for_file = PromptTemplate(
+    input_variables=["message", "best_practice"],
+    template=template_for_file
+)
 
-# chain_for_file = LLMChain(llm=llm, prompt=prompt)
+chain_for_file = LLMChain(llm=llm, prompt=prompt)
 
 # 4. Retrieval augmented generation
 
@@ -81,7 +81,7 @@ def generate_response(message):
 
 def generate_response_from_file(text, message):
     best_practice = embedding.retrieve_info_from_file(text, message)
-    response = chain.run(message=message, best_practice=best_practice)
+    response = chain_for_file.run(message=message, best_practice=best_practice)
     return response
 
 

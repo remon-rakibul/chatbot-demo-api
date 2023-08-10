@@ -1,6 +1,7 @@
 from langchain.document_loaders import UnstructuredPowerPointLoader
 from langchain.document_loaders import Docx2txtLoader
-from fastapi import FastAPI, File, UploadFile, Form 
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import TextLoader
 from pydantic import BaseModel
@@ -15,6 +16,20 @@ class Prompt(BaseModel):
     prompt: str
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:8000",
+    "http://5.189.160.223:8054",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health")
 async def health():

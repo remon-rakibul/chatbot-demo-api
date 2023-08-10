@@ -30,12 +30,24 @@ Here is a list of best practies of how we normally respond to user in similar sc
 Please write the best response that will impress the user to work with the company:
 """
 
+template_for_file = """
+// Write your prompt engineered template here
+
+"""
+
 prompt = PromptTemplate(
     input_variables=["message", "best_practice"],
     template=template
 )
 
 chain = LLMChain(llm=llm, prompt=prompt)
+
+prompt_for_file = PromptTemplate(
+    input_variables=["message", "best_practice"],
+    template=template_for_file
+)
+
+chain_for_file = LLMChain(llm=llm, prompt=prompt)
 
 # 4. Retrieval augmented generation
 

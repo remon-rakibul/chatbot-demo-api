@@ -24,32 +24,14 @@ db = FAISS.from_documents(data, embeddings)
 
 ## For uploaded files
 
-def retrieve_info_from_pdf_file(pages, query):
-    db = FAISS.from_documents(pages, embeddings)
-    similar_response = db.similarity_search(query, k=3)
-
-    page_contents_array = [doc.page_content for doc in similar_response]
-
-    # print(page_contents_array)
-
-    return page_contents_array
-
-
 def retrieve_info_from_file(pages, query):
     db = FAISS.from_documents(pages, embeddings)
     similar_response = db.similarity_search(query, k=3)
     page_contents_array = [doc.page_content for doc in similar_response]
-
-    # print(page_contents_array)
-
     return page_contents_array
 
 
 def retrieve_info(query):
     similar_response = db.similarity_search(query, k=3)
-
     page_contents_array = [doc.page_content for doc in similar_response]
-
-    # print(page_contents_array)
-
     return page_contents_array

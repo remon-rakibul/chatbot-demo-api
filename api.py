@@ -17,15 +17,15 @@ class Prompt(BaseModel):
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:8000",
-    "http://5.189.160.223:8054",
-]
+# origins = [
+#     "http://localhost:8000",
+#     "http://5.189.160.223:8054",
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

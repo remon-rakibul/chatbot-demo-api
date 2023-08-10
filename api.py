@@ -35,9 +35,6 @@ app.add_middleware(
 async def health():
     return {"Message": "Up and Running"}
 
-@app.post("/")
-async def create_item(res: Prompt):
-    return res
 
 @app.post("/chat")
 async def upload(query: Annotated[str, Form()], file: Annotated[UploadFile | None, File()] = None):

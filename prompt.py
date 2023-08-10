@@ -42,12 +42,12 @@ prompt = PromptTemplate(
 
 chain = LLMChain(llm=llm, prompt=prompt)
 
-prompt_for_file = PromptTemplate(
-    input_variables=["message", "best_practice"],
-    template=template_for_file
-)
+# prompt_for_file = PromptTemplate(
+#     input_variables=["message", "best_practice"],
+#     template=template_for_file
+# )
 
-chain_for_file = LLMChain(llm=llm, prompt=prompt)
+# chain_for_file = LLMChain(llm=llm, prompt=prompt)
 
 # 4. Retrieval augmented generation
 

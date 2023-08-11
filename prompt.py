@@ -68,7 +68,7 @@ prompt_for_file = PromptTemplate(
     template=template_for_file
 )
 
-chain_for_file = LLMChain(llm=llm, prompt=prompt)
+chain_for_file = LLMChain(llm=llm, prompt=prompt_for_file)
 
 
 def generate_response(message):

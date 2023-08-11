@@ -3,8 +3,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 import embedding
 
-# 3. Setup LLMChain and prompts
-
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
 
 template = """
@@ -31,7 +29,7 @@ Please write the best response that will impress the user to work with the compa
 """
 
 template_for_file = """
-You are a world class representative chatbot 
+You are a document reader chatbot 
 you will share a user's message with you and you will give me the best answer based on past best practies, 
 and you will follow ALL of the rules below:
 
@@ -44,7 +42,7 @@ in terms of length, ton of voice, logical arguments and other details
 
 4/ When user wants to know more about a topic then don't give the same answer, try to give different answer with proper examples and if any reference need then try to add that reference.
 
-5/ Avoid any types of special characters like(\n, \a, \b, \t, \r) in your response. Response should only be in text
+5/ Avoid any types of special characters like '/n' in your response. Response should only be in text
 
 6/ Don't hallucinate if don't understand any topic or if you don't have any data on a topic, at that time just admit you don't know the answer.
 
@@ -55,7 +53,7 @@ Below is a message I received from the user:
 Here is a list of best practies of how we normally respond to user in similar scenarios:
 {best_practice}
 
-Please write the best response that will impress the user:
+Please write the best relevant response to send to the user:
 """
 
 prompt = PromptTemplate(
@@ -72,7 +70,6 @@ prompt_for_file = PromptTemplate(
 
 chain_for_file = LLMChain(llm=llm, prompt=prompt)
 
-# 4. Retrieval augmented generation
 
 def generate_response(message):
     best_practice = embedding.retrieve_info(message)
@@ -83,7 +80,3 @@ def generate_response_from_file(text, message):
     best_practice = embedding.retrieve_info_from_file(text, message)
     response = chain_for_file.run(message=message, best_practice=best_practice)
     return response
-
-
-# query = input("enter your message: ")
-# print(f'Response: {generate_response(query)}')

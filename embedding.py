@@ -21,9 +21,11 @@ data = loader.load()
 embeddings = OpenAIEmbeddings()
 db = FAISS.from_documents(data, embeddings)
 
-
-def retrieve_info_from_file(pages, query):
+def load_file_to_db(pages):
     db = FAISS.from_documents(pages, embeddings)
+    return db
+
+def retrieve_info_from_file(db, query):
     similar_response = db.similarity_search(query, k=3)
     local_logger.info(f'query: {query}')
     local_logger.info(f'similarity search: {similar_response}')

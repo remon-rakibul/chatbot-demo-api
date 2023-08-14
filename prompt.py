@@ -15,7 +15,7 @@ in terms of length, ton of voice, logical arguments and other details
 
 2/ If the best practice are irrelevant, then try to mimic the style of the best practice to user's message
 
-3/ Avoid any html tags in your response. Response should only be in text
+3/ Avoid any html tags and newline character like '/n' in your response. Response should only be in text
 
 4/ Don't make up information. If you don't know something, admit you don't know
 
@@ -76,7 +76,7 @@ def generate_response(message):
     response = chain.run(message=message, best_practice=best_practice)
     return response
 
-def generate_response_from_file(text, message):
-    best_practice = embedding.retrieve_info_from_file(text, message)
-    response = chain_for_file.run(message=message, best_practice=best_practice)
+def generate_response_from_file(db, query):
+    best_practice = embedding.retrieve_info_from_file(db, query)
+    response = chain_for_file.run(message=query, best_practice=best_practice)
     return response

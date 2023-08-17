@@ -55,10 +55,10 @@ app.db = None
 async def health():
     return {"Message": "Up and Running"}
 
-
 @app.post("/upload")
 async def upload(file: Annotated[UploadFile, File()]):
     app.ast = False
+
     temp_dir = tempfile.mkdtemp()
     file_path = os.path.join(temp_dir, file.filename)
 

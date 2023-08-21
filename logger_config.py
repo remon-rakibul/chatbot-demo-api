@@ -13,6 +13,16 @@ def setup_logger(name) -> logging.Logger:
     return logger
 
 
+def setup_chat_logger(name) -> logging.Logger:
+    # FORMAT = '%(message)s'
+
+    logging.basicConfig(
+        level=logging.INFO, filename="api.log"
+    )
+
+    logger = logging.getLogger(name)
+    return logger
+
 # in any file that import fn setup_logger from the above 'logger_config.py', you can set up local logger like:
 # local_logger = setup_logger(__name__)
 

@@ -27,15 +27,15 @@ def load_file_to_db(pages):
 
 def retrieve_info_from_file(db, query):
     similar_response = db.similarity_search(query, k=3)
-    local_logger.info(f'query: {query}')
-    local_logger.info(f'similarity search: {similar_response}')
+    # local_logger.info(f'query: {query}')
+    # local_logger.info(f'similarity search: {similar_response}')
     page_contents_array = [doc.page_content for doc in similar_response]
     return page_contents_array
 
 
 def retrieve_info(query):
     similar_response = db.similarity_search(query, k=3)
-    local_logger.info(f'query: {query}')
-    local_logger.info(f'similarity search: {similar_response}')
+    # local_logger.info(f'query: {query}')
+    # local_logger.info(f'similarity search: {similar_response}')
     page_contents_array = [doc.page_content for doc in similar_response]
     return page_contents_array

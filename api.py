@@ -56,7 +56,7 @@ async def health():
     return {"Message": "Up and Running"}
 
 @app.post("/upload")
-async def upload(file: Annotated[UploadFile, File()]):
+async def upload(file: UploadFile = File(...)):
 
 
     current_datetime = datetime.now()

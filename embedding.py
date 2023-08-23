@@ -1,3 +1,5 @@
+import pinecone 
+from langchain.vectorstores import Pinecone
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
@@ -18,11 +20,17 @@ urls = [
 loader = UnstructuredURLLoader(urls=urls)
 data = loader.load()
 
+index_name = "arisaf-chatbot"
 embeddings = OpenAIEmbeddings()
-db = FAISS.from_documents(data, embeddings)
+pinecone.init(
+    api_key="489f9d8c-eb70-4f3a-b71c-264d5d6810a0",
+    environment="asia-southeast1-gcp-free"
+)
+
+db = Pinecone.from_documents(data, embeddings, index_name=index_name)
 
 def load_file_to_db(pages):
-    db = FAISS.from_documents(pages, embeddings)
+    db = Pinecone.from_documents(pages, embeddings, index_name=index_name)
     return db
 
 def retrieve_info_from_file(db, query):

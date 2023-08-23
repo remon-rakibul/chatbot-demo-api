@@ -6,7 +6,7 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import TextLoader
 from pydantic import BaseModel
 from typing import Annotated
-import embedding
+# import embedding
 import tempfile
 import uvicorn
 import prompt
@@ -57,6 +57,30 @@ async def health():
 
 @app.post("/upload")
 async def upload(file: Annotated[UploadFile, File()]):
+
+
+    current_datetime = datetime.now()
+    
+    formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+    content = await file.read()
+    file_data = {
+        "name": file.filename,
+        "content": content,
+        "time": formatted_datetime
+    }
+
+    file_collection.insert_one(file_data)
+    # DIR = "temp"
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+
+    print(file_data["time"])
+
+
+    with open(os.path.join("temp", file_data["time"]), "wb") as f:
+        f.write(content)
+
+
     app.ast = False
 
     temp_dir = tempfile.mkdtemp()
@@ -68,22 +92,22 @@ async def upload(file: Annotated[UploadFile, File()]):
     if (file.filename.endswith(".pdf")):
         loader = PyPDFLoader(file_path)
         pages = loader.load_and_split()
-        app.db = embedding.load_file_to_db(pages)
+        # app.db = embedding.load_file_to_db(pages)
 
     elif (file.filename.endswith(".docx") or file.filename.endswith(".doc")):
         loader = Docx2txtLoader(file_path)
         data = loader.load()
-        app.db = embedding.load_file_to_db(data)
+        # app.db = embedding.load_file_to_db(data)
 
     elif (file.filename.endswith(".ppt") or file.filename.endswith(".pptx")):
         loader = UnstructuredPowerPointLoader(file_path)
         data = loader.load()
-        app.db = embedding.load_file_to_db(data)
+        # app.db = embedding.load_file_to_db(data)
 
     elif (file.filename.endswith(".txt")):
         loader = TextLoader(file_path)
         data = loader.load()
-        app.db = embedding.load_file_to_db(data)
+        # app.db = embedding.load_file_to_db(data)
 
     return {"response": f"{file.filename} uploaded successfully"}
 

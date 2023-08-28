@@ -17,6 +17,9 @@ from bson.objectid import ObjectId
 from bson.json_util import dumps
 from fastapi.responses import JSONResponse, FileResponse
 from pymongo import MongoClient
+import dns
+import urllib
+from pymongo.server_api import ServerApi
 # import tempfile
 
 
@@ -25,8 +28,16 @@ class Prompt(BaseModel):
 
 app = FastAPI()
 
-client = MongoClient("mongodb://5.189.160.223:27017/")
+client = MongoClient("mongodb://5.189.160.223:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.9.1")
+# client = MongoClient("mongodb://arisaftech:AST@#4321@arisaftech.ru6oaja.mongodb.net/", server_api=ServerApi('1'))
+# mongo_uri = "mongodb://arisaftech:" + urllib.parse.quote("AST@#4321") + "@127.0.0.1:27017/"
+# client = MongoClient(mongo_uri)
+# uri = "mongodb+srv://arisaftech:AST@#4321@arisaftech.ru6oaja.mongodb.net/?retryWrites=true&w=majority"
+# client = MongoClient(uri, server_api=ServerApi('1'))
+
+
 # db = client("file_storage") 
+
 db = client.file_storage
 file_collection = db["files"]
 

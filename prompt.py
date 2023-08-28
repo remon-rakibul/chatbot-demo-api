@@ -1,18 +1,26 @@
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
-from logger_config import setup_chat_logger
+# from logger_config import setup_chat_logger
+from logger_config import ChatLogger
 from langchain.chains import LLMChain
 import embedding
+import os
 
-local_logger = setup_chat_logger(__name__)
+# local_logger = setup_chat_logger(__name__)
 
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
 
-with open('api.log', 'r') as f:
-    context = f.read()
-    words = context[-1600:].split()
-    tokens = ' '.join(words[-200:])
+# with open('api.log', 'r') as f:
+#     context = f.read()
+#     words = context[-1600:].split()
+#     tokens = ' '.join(words[-200:])
     # print(tokens)
+
+log_directory = "chat_logs"
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+chat_logger = ChatLogger(log_directory)
 
 
 template = """
@@ -28,9 +36,6 @@ in terms of length, ton of voice, logical arguments and other details
 3/ Avoid any html tags and newline character like '/n' in your response. Response should only be in text
 
 4/ Don't make up information. If you don't know something, admit you don't know
-
-It was previous conversation:
-{tokens}
 
 Below is a message I received from the user:
 {message}
@@ -70,7 +75,7 @@ Please write the best relevant response to send to the user:
 """
 
 prompt = PromptTemplate(
-    input_variables=["tokens", "message", "best_practice"],
+    input_variables=["message", "best_practice"],
     template=template
 )
 
@@ -86,11 +91,16 @@ chain_for_file = LLMChain(llm=llm, prompt=prompt_for_file)
 
 def generate_response(message):
     best_practice = embedding.retrieve_info(message)
-    response = chain.run(tokens=tokens, message=message, best_practice=best_practice)
-    local_logger.info(response)
+    response = chain.run(message=message, best_practice=best_practice)
+    # local_logger.info(response)
+    try:
+        chat_logger.log_message(message, response)
+    except Exception as e:
+        print("Error logging message:", e)
     return response
 
 def generate_response_from_file(db, query):
     best_practice = embedding.retrieve_info_from_file(db, query)
     response = chain_for_file.run(message=query, best_practice=best_practice)
+    chat_logger.log_message(query, response)
     return response

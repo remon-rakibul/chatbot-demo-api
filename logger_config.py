@@ -29,3 +29,28 @@ def setup_chat_logger(name) -> logging.Logger:
 # local_logger.info(
 #     f"I am writing to file {FILENAME}. If that file did not exist, it would be automatically created. Here, you can change me to write about the call to a specific route function etc."
 # )
+
+
+
+import os
+import datetime
+
+class ChatLogger:
+    def __init__(self, log_directory):
+        self.log_directory = log_directory
+        self._setup_logger()
+
+    def _setup_logger(self):
+        log_filename = self._get_log_filename()
+        logging.basicConfig(filename=log_filename, level=logging.INFO, force= True,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+
+    def _get_log_filename(self):
+        now = datetime.datetime.now()
+        date_str = now.strftime("%Y-%m-%d")
+        return os.path.join(self.log_directory, f"{date_str}.log")
+
+    def log_message(self, user_message, bot_response):
+        logging.info(f"User: {user_message}")
+        logging.info(f"Bot: {bot_response}")
+        logging.info("=" * 20)

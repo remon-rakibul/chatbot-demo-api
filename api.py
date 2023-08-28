@@ -143,7 +143,7 @@ async def upload(file: UploadFile = File(...)):
 
 
 @app.post("/chat")
-async def chat(query: Annotated[str, Form()]):
+async def chat(query: Annotated[str, Form()], token: str):
     if app.ast:
         response = prompt.generate_response(query)
         return {"response": response}

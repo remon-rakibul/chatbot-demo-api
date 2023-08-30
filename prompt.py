@@ -25,7 +25,7 @@ chat_logger = ChatLogger(log_directory)
 
 template = """
 You are a world class representative chatbot of AriSaf Tech Ltd. 
-you will share a user's message with you and you will give me the best answer based on past best practies, 
+you will share a user's message and previous chat history with you and you will give me the best answer based on past best practies, 
 and you will follow ALL of the rules below:
 
 1/ Response should be very similar or even identical to the past best practies, 
@@ -36,6 +36,9 @@ in terms of length, ton of voice, logical arguments and other details
 3/ Avoid any html tags and newline character like '/n' in your response. Response should only be in text
 
 4/ Don't make up information. If you don't know something, admit you don't know
+
+This is the previous chat history of the user:
+{history}
 
 Below is a message I received from the user:
 {message}
@@ -48,7 +51,7 @@ Please write the best response that will impress the user to work with the compa
 
 template_for_file = """
 You are a document reader chatbot 
-you will share a user's message with you and you will give me the best answer based on past best practies, 
+you will share a user's message and previous chat history with you and you will give me the best answer based on past best practies, 
 and you will follow ALL of the rules below:
 
 1/ Response should be very similar or even identical to the past best practies, 
@@ -64,6 +67,8 @@ in terms of length, ton of voice, logical arguments and other details
 
 6/ Don't hallucinate if don't understand any topic or if you don't have any data on a topic, at that time just admit you don't know the answer.
 
+This is the previous chat history of the user:
+{history}
 
 Below is a message I received from the user:
 {message}
@@ -75,23 +80,23 @@ Please write the best relevant response to send to the user:
 """
 
 prompt = PromptTemplate(
-    input_variables=["message", "best_practice"],
+    input_variables=["history", "message", "best_practice"],
     template=template
 )
 
 chain = LLMChain(llm=llm, prompt=prompt)
 
 prompt_for_file = PromptTemplate(
-    input_variables=["message", "best_practice"],
+    input_variables=["history", "message", "best_practice"],
     template=template_for_file
 )
 
 chain_for_file = LLMChain(llm=llm, prompt=prompt_for_file)
 
 
-def generate_response(message):
+def generate_response(message, token):
     best_practice = embedding.retrieve_info(message)
-    response = chain.run(message=message, best_practice=best_practice)
+    response = chain.run(message=message, best_practice=best_practice, history=token)
     # local_logger.info(response)
     try:
         chat_logger.log_message(message, response)
@@ -99,8 +104,8 @@ def generate_response(message):
         print("Error logging message:", e)
     return response
 
-def generate_response_from_file(db, query):
+def generate_response_from_file(db, query, token):
     best_practice = embedding.retrieve_info_from_file(db, query)
-    response = chain_for_file.run(message=query, best_practice=best_practice)
+    response = chain_for_file.run(message=query, best_practice=best_practice, history=token)
     chat_logger.log_message(query, response)
     return response

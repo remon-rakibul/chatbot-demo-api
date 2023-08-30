@@ -17,9 +17,6 @@ from bson.objectid import ObjectId
 from bson.json_util import dumps
 from fastapi.responses import JSONResponse, FileResponse
 from pymongo import MongoClient
-import dns
-import urllib
-from pymongo.server_api import ServerApi
 # import tempfile
 
 
@@ -101,16 +98,16 @@ async def upload(file: UploadFile = File(...)):
 
     with open(file_path, "wb") as f:
         f.write(file.file.read())
-    print(f"This is the filename: {file.filename}")
+    # print(f"This is the filename: {file.filename}")
     if (file.filename.endswith(".pdf")):
         loader = PyPDFLoader(file_path)
         pages = loader.load_and_split()
         app.db = embedding.load_file_to_db(pages)
 
     elif (file.filename.endswith(".docx") or file.filename.endswith(".doc")):
-        print(f"this is the file_path: {file_path}")
+        # print(f"this is the file_path: {file_path}")
         loader = Docx2txtLoader(file_path)
-        print("working fine....")
+        # print("working fine....")
         data = loader.load()
         app.db = embedding.load_file_to_db(data)
 
@@ -156,10 +153,10 @@ async def upload(file: UploadFile = File(...)):
 @app.post("/chat")
 async def chat(query: Annotated[str, Form()], token: Annotated[str, Form()] | None = None):
     if app.ast:
-        response = prompt.generate_response(query)
+        response = prompt.generate_response(query, token)
         return {"response": response}
     else:
-        response = prompt.generate_response_from_file(app.db, query)
+        response = prompt.generate_response_from_file(app.db, query, token)
         return {"response": response}
 
 
@@ -216,7 +213,7 @@ async def download_file(file_id: str):
         return JSONResponse(content={"message": "File not found"}, status_code=404)
     
     file_content = file_data["content"]
-    file_name = file_data["name"] 
+    file_name = file_data["name"]
     file_time = file_data["time"]
 
     if not os.path.exists("temp"):

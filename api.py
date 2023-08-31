@@ -20,8 +20,9 @@ from pymongo import MongoClient
 # import tempfile
 
 
-class Prompt(BaseModel):
-    prompt: str
+class Chat(BaseModel):
+    query: str
+    token: str | None = None
 
 app = FastAPI()
 
@@ -151,12 +152,12 @@ async def upload(file: UploadFile = File(...)):
 
 
 @app.post("/chat")
-async def chat(query: str, token: str | None = None):
+async def chat(chat: Chat):
     if app.ast:
-        response = prompt.generate_response(query, token)
+        response = prompt.generate_response(chat.query, chat.token)
         return {"response": response}
     else:
-        response = prompt.generate_response_from_file(app.db, query, token)
+        response = prompt.generate_response_from_file(app.db, chat.query, chat.token)
         return {"response": response}
 
 

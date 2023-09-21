@@ -113,7 +113,8 @@ def generate_response(message, token):
     response = chain.run(message=message, best_practice=best_practice, history=token)
     # local_logger.info(response)
     try:
-        chat_logger.log_message(message, response)
+        # chat_logger.log_db(best_practice)
+        chat_logger.log_message(message, response, best_practice, token)
     except Exception as e:
         print("Error logging message:", e)
     return response
@@ -121,5 +122,6 @@ def generate_response(message, token):
 def generate_response_from_file(db, query, token):
     best_practice = embedding.retrieve_info_from_file(db, query)
     response = chain_for_file.run(message=query, best_practice=best_practice, history=token)
-    chat_logger.log_message(query, response)
+    # chat_logger.log_db(best_practice)
+    chat_logger.log_message(query, response, best_practice, token)
     return response

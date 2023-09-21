@@ -1,6 +1,7 @@
 from langchain.document_loaders import UnstructuredPowerPointLoader
 from langchain.document_loaders import Docx2txtLoader
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, WebSocket
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import TextLoader
@@ -17,6 +18,7 @@ from bson.objectid import ObjectId
 from bson.json_util import dumps
 from fastapi.responses import JSONResponse, FileResponse
 from pymongo import MongoClient
+import io
 # import tempfile
 
 
@@ -151,14 +153,28 @@ async def upload(file: UploadFile = File(...)):
     return {"response": f"{file.filename} uploaded successfully"}
 
 
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await websocket.accept()
+#     while True:
+#         data = await websocket.receive_text()
+#         # Process the received data and generate a response
+#         # You can call your chatbot logic here
+#         response = prompt.generate_response(data)
+#         await websocket.send_text(response)
+
 @app.post("/chat")
 async def chat(chat: Chat):
     if app.ast:
-        response = prompt.generate_response(chat.query, chat.token)
-        return {"response": response}
+        response = prompt.generate_response(chat.query, chat.token).encode("utf-8")
+        stream = io.BytesIO(response)
+        # return {"response": response}
+        return StreamingResponse(stream)
     else:
-        response = prompt.generate_response_from_file(app.db, chat.query, chat.token)
-        return {"response": response}
+        response = prompt.generate_response_from_file(app.db, chat.query, chat.token).encode("utf-8")
+        stream = io.BytesIO(response)
+        return StreamingResponse(stream)
+        # return {"response": response}
 
 
 @app.post("/uploadfile")

@@ -42,7 +42,7 @@ class ChatLogger:
 
     def _setup_logger(self):
         log_filename = self._get_log_filename()
-        logging.basicConfig(filename=log_filename, level=logging.DEBUG, force= True,
+        logging.basicConfig(filename=log_filename, level=logging.DEBUG, force= True, filemode='w',
                             format='%(asctime)s - %(levelname)s - %(message)s')
 
     def _get_log_filename(self):

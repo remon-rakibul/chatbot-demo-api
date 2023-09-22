@@ -5,10 +5,11 @@ from logger_config import ChatLogger
 from langchain.chains import LLMChain
 import embedding
 import os
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 # local_logger = setup_chat_logger(__name__)
 
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k-0613")
+llm = ChatOpenAI(streaming=True, callbacks=[StreamingStdOutCallbackHandler()], temperature=0, model="gpt-3.5-turbo-16k-0613")
 
 # with open('api.log', 'r') as f:
 #     context = f.read()

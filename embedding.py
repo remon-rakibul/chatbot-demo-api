@@ -1,4 +1,5 @@
-import pinecone 
+import codecs
+import pinecone
 from langchain.vectorstores import Pinecone
 from langchain.document_loaders import UnstructuredURLLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -37,7 +38,7 @@ def retrieve_info_from_file(db, query):
     similar_response = db.similarity_search(query, k=3)
     # local_logger.info(f'query: {query}')
     # local_logger.info(f'similarity search: {similar_response}')
-    page_contents_array = [doc.page_content for doc in similar_response]
+    page_contents_array = [codecs.decode(doc.page_content, 'unicode_escape') for doc in similar_response]
     return page_contents_array
 
 
@@ -45,5 +46,6 @@ def retrieve_info(query):
     similar_response = db.similarity_search(query, k=3)
     # local_logger.info(f'query: {query}')
     # local_logger.info(f'similarity search: {similar_response}')
-    page_contents_array = [doc.page_content for doc in similar_response]
+    page_contents_array = [codecs.decode(doc.page_content, 'unicode_escape') for doc in similar_response]
+    print(page_contents_array)
     return page_contents_array

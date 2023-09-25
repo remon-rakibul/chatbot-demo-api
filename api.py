@@ -1,7 +1,8 @@
 from langchain.document_loaders import UnstructuredPowerPointLoader
 from langchain.document_loaders import Docx2txtLoader
-from fastapi import FastAPI, File, UploadFile, Form, WebSocket
+from fastapi import FastAPI, File, UploadFile, Form, WebSocket, Depends
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.document_loaders import PyPDFLoader
 from langchain.document_loaders import TextLoader
@@ -14,12 +15,20 @@ import prompt
 import os
 from pathlib import Path
 from datetime import datetime
-from bson.objectid import ObjectId 
-from bson.json_util import dumps
 from fastapi.responses import JSONResponse, FileResponse
-from pymongo import MongoClient
+# from bson.objectid import ObjectId 
+# from bson.json_util import dumps
+# from fastapi.responses import JSONResponse, FileResponse
+# from pymongo import MongoClient
 import io
+from db import SessionLocal
+from db import engine
+from models import Base
+import models as model
+Base.metadata.create_all(bind=engine)
 # import tempfile
+
+
 
 
 class Chat(BaseModel):
@@ -28,7 +37,7 @@ class Chat(BaseModel):
 
 app = FastAPI()
 
-client = MongoClient("mongodb://5.189.160.223:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.9.1")
+# client = MongoClient("mongodb://5.189.160.223:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.9.1")
 # client = MongoClient("mongodb://arisaftech:AST@#4321@arisaftech.ru6oaja.mongodb.net/", server_api=ServerApi('1'))
 # mongo_uri = "mongodb://arisaftech:" + urllib.parse.quote("AST@#4321") + "@127.0.0.1:27017/"
 # client = MongoClient(mongo_uri)
@@ -38,8 +47,8 @@ client = MongoClient("mongodb://5.189.160.223:27017/?directConnection=true&serve
 
 # db = client("file_storage") 
 
-db = client.file_storage
-file_collection = db["files"]
+# db = client.file_storage
+# file_collection = db["files"]
 
 class FileUpload(BaseModel):
     name: str
@@ -58,7 +67,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 app.ast = True
 app.db = None
 
@@ -136,7 +150,7 @@ async def upload(file: UploadFile = File(...)):
             "time": formatted_datetime
         }
 
-        file_collection.insert_one(file_data)
+        # file_collection.insert_one(file_data)
         # DIR = "temp"
         if not os.path.exists("temp"):
             os.makedirs("temp")
@@ -178,7 +192,7 @@ async def chat(chat: Chat):
 
 
 @app.post("/uploadfile")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), db: Session = Depends((get_db))):
 
     current_datetime = datetime.now()
     
@@ -190,7 +204,7 @@ async def upload_file(file: UploadFile = File(...)):
         "time": formatted_datetime
     }
 
-    file_collection.insert_one(file_data)
+    # file_collection.insert_one(file_data)
     # DIR = "temp"
     if not os.path.exists("temp"):
         os.makedirs("temp")
@@ -198,48 +212,39 @@ async def upload_file(file: UploadFile = File(...)):
     print(file_data["time"])
 
 
-    with open(os.path.join("temp", file_data["time"]), "wb") as f:
+    with open(os.path.join("temp", (file_data["time"] + file_data["name"]) ) , "wb") as f:
         f.write(content)
+        file_dict = {
+            "name": formatted_datetime + file_data["name"] ,
+            "path": os.path.join("temp/" + formatted_datetime + file_data["name"])
+        }
+        file_item = model.Files(**file_dict)
+        print(file_item)
+        try:
+            db.add(file_item)
+            db.commit()
+        except:
+            return {"Message": "Something went wrong with the db"}
+              
 
     return {"Message": "File upload successful"}
 
 
 @app.get("/all")
-async def get_files():
-    # files = list (file_collection.find())
-    # serialized_files = dumps(files)
-    # return JSONResponse(content=serialized_files)
-    files = list(file_collection.find())
-    serialized_files = []
-
-    for file in files:
-        serialized_files.append({
-            "_id": str(file["_id"]),
-            "name": file["name"],
-            "time": file["time"]
-        })
-        print("testing")
-    return serialized_files
+async def get_files(db: Session = Depends((get_db))):
+    files = db.query(model.Files).all()
+    db.close()
+    return files
 
 @app.get("/download/{file_id}")
-async def download_file(file_id: str):
+async def download_file(file_id: int, db: Session = Depends((get_db))):
     
-    file_data = file_collection.find_one({"_id": ObjectId(file_id)})
+    file_data =  db.query(model.Files).filter(model.Files.id == file_id).first()
 
     if not file_data:
         return JSONResponse(content={"message": "File not found"}, status_code=404)
     
-    file_content = file_data["content"]
-    file_name = file_data["name"]
-    file_time = file_data["time"]
-
-    if not os.path.exists("temp"):
-        os.makedirs("temp")
-    
-    file_path = Path("temp") / file_time
-    print(file_path)
-    # return FileResponse(file_path, file_name)
-    return FileResponse(file_path, media_type='application/octet-stream',filename=file_name)
+    return FileResponse(file_data.path, media_type='application/octet-stream',filename=file_data.name, status_code = 200)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

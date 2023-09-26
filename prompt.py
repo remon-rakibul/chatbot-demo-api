@@ -58,8 +58,8 @@ This is the previous chat history of the user:
 Below is a message I received from the user:
 {message}
 
-Here is a list of best practies of how we normally respond to user in similar scenarios:
-{best_practice}
+Here is a list of documents that is similar to user's question:
+{documents}
 
 Please write the best response that will impress the user to work with the company:
 """
@@ -96,21 +96,21 @@ This is the previous chat history of the user:
 Below is a message I received from the user:
 {message}
 
-Here is a list of best practies of how we normally respond to user in similar scenarios:
-{best_practice}
+Here is a list of documents that is similar to user's question:
+{documents}
 
 Please write the best relevant response to send to the user:
 """
 
 prompt = PromptTemplate(
-    input_variables=["history", "message", "best_practice"],
+    input_variables=["history", "message", "documents"],
     template=template
 )
 
 chain = LLMChain(llm=llm, prompt=prompt)
 
 prompt_for_file = PromptTemplate(
-    input_variables=["history", "message", "best_practice"],
+    input_variables=["history", "message", "documents"],
     template=template_for_file
 )
 
@@ -118,19 +118,19 @@ chain_for_file = LLMChain(llm=llm, prompt=prompt_for_file)
 
 
 def generate_response(message, token):
-    best_practice = embedding.retrieve_info(message)
-    response = chain.run(message=message, best_practice=best_practice, history=token)
+    documents = embedding.retrieve_info(message)
+    response = chain.run(message=message, documents=documents, history=token)
     # local_logger.info(response)
     try:
         # chat_logger.log_db(best_practice)
-        chat_logger.log_message(message, response, best_practice, token)
+        chat_logger.log_message(message, response, documents, token)
     except Exception as e:
         print("Error logging message:", e)
     return response
 
 def generate_response_from_file(db, query, token):
-    best_practice = embedding.retrieve_info_from_file(db, query)
-    response = chain_for_file.run(message=query, best_practice=best_practice, history=token)
+    documents = embedding.retrieve_info_from_file(db, query)
+    response = chain_for_file.run(message=query, documents=documents, history=token)
     # chat_logger.log_db(best_practice)
-    chat_logger.log_message(query, response, best_practice, token)
+    chat_logger.log_message(query, response, documents, token)
     return response

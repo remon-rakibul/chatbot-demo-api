@@ -1,11 +1,11 @@
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 # from logger_config import setup_chat_logger
-from logger_config import ChatLogger
 from langchain.chains import LLMChain
+from logger_config import ChatLogger
 import embedding
 import os
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 # local_logger = setup_chat_logger(__name__)
 
@@ -66,7 +66,7 @@ Please write the best response that will impress the user to work with the compa
 
 template_for_file = """
 You are a document reader chatbot 
-you will share a user's message and previous chat history with you and you will give me the best answer based on past best practies, 
+I will share a user's message and previous chat history with you and you will give me the best answer based on past best practies, 
 and you will follow ALL of the rules below:
 
 1/ Response should be very similar or even identical to the past best practies, 
@@ -74,15 +74,23 @@ in terms of length, ton of voice, logical arguments and other details
 
 2/ If the best practice are irrelevant, then try to mimic the style of the best practice to user's message
 
-3/ If needed break down the answer to give a proper response step by step
+3/ Don't hallucinate if don't understand any topic or if you don't have any data on a topic, at that time just admit you don't know the answer.
 
-4/ When user wants to know more about a topic then don't give the same answer, try to give different answer with proper examples and if any reference need then try to add that reference.
+4/ Keep the response short and concise
 
-5/ Avoid any types of special characters like '/n' in your response. Response should only be in text
+5/ Include important informations in a structured way
 
-6/ Don't hallucinate if don't understand any topic or if you don't have any data on a topic, at that time just admit you don't know the answer.
+6/ Format the response with newlines and bullet points to if necessary
 
-This is the previous conversation between you and the user:
+7/ Behave politely and professionally in your response
+
+8/ Perform basic arithmetic operations with step by step explanations
+
+9/ If needed break down the answer to give a proper response step by step
+
+10/ When user wants to know about a topic, try to give answer with proper examples and references.
+
+This is the previous chat history of the user:
 {history}
 
 Below is a message I received from the user:

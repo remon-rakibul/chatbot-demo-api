@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 from fastapi.responses import JSONResponse, FileResponse
+from hurry.filesize import size
 # from bson.objectid import ObjectId 
 # from bson.json_util import dumps
 # from fastapi.responses import JSONResponse, FileResponse
@@ -201,7 +202,8 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends((get_d
     file_data = {
         "name": file.filename,
         "content": content,
-        "time": formatted_datetime
+        "time": formatted_datetime,
+        "size": file.size
     }
 
     # file_collection.insert_one(file_data)
@@ -216,7 +218,8 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends((get_d
         f.write(content)
         file_dict = {
             "name": formatted_datetime + file_data["name"] ,
-            "path": os.path.join("temp/" + formatted_datetime + file_data["name"])
+            "path": os.path.join("temp/" + formatted_datetime + file_data["name"]),
+            "size": size(file_data["size"])
         }
         file_item = model.Files(**file_dict)
         print(file_item)
@@ -232,9 +235,12 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends((get_d
 
 @app.get("/all")
 async def get_files(db: Session = Depends((get_db))):
-    files = db.query(model.Files).all()
-    db.close()
-    return files
+    try:
+        files = db.query(model.Files).all()
+        db.close()
+        return files
+    except: 
+       return {"Message": "Something went wrong"}
 
 @app.get("/download/{file_id}")
 async def download_file(file_id: int, db: Session = Depends((get_db))):

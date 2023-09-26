@@ -42,7 +42,7 @@ class ChatLogger:
 
     def _setup_logger(self):
         log_filename = self._get_log_filename()
-        logging.basicConfig(filename=log_filename, level=logging.INFO, force= True,
+        logging.basicConfig(filename=log_filename, level=logging.DEBUG, force= True, filemode='w',
                             format='%(asctime)s - %(levelname)s - %(message)s')
 
     def _get_log_filename(self):
@@ -50,7 +50,10 @@ class ChatLogger:
         date_str = now.strftime("%Y-%m-%d")
         return os.path.join(self.log_directory, f"{date_str}.log")
 
-    def log_message(self, user_message, bot_response):
+    def log_message(self, user_message, bot_response, similarity_search, token):
         logging.info(f"User: {user_message}")
+        logging.info(f"Token: {token}")
+        for index, value in enumerate(similarity_search):
+            logging.info("Pinecone similarity {}: {}".format(index+1,value.replace('\t','').replace('\n','')))
         logging.info(f"Bot: {bot_response}")
         logging.info("=" * 20)
